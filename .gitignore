@@ -1,0 +1,10 @@
+node_modules/
+uploads/*
+!uploads/.gitkeep
+converted/*
+!converted/.gitkeep
+temp/*
+!temp/.gitkeep
+.env
+*.log
+.DS_Store
