@@ -1,0 +1,80 @@
+
+.footer {
+  position: relative;
+  padding-top: var(--space-2xl);
+  padding-bottom: var(--space-lg);
+  border-top: 1px solid var(--border-glass);
+  overflow: hidden;
+}
+
+.footer-top {
+  display: grid;
+  grid-template-columns: 1.4fr repeat(4, 1fr);
+  gap: var(--space-lg);
+  padding-bottom: var(--space-2xl);
+}
+
+.footer-brand-col p {
+  color: var(--text-tertiary);
+  font-size: var(--fs-body-sm);
+  max-width: 30ch;
+  margin-top: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.footer-socials {
+  display: flex;
+  gap: var(--space-2xs);
+}
+.footer-social-btn {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--bg-glass-strong);
+  border: 1px solid var(--border-glass);
+  color: var(--text-secondary);
+  transition: all var(--dur-fast);
+}
+.footer-social-btn:hover {
+  color: #fff;
+  background: var(--gradient-primary);
+  border-color: transparent;
+  transform: translateY(-3px);
+}
+.footer-social-btn svg { width: 16px; height: 16px; }
+
+.footer-col h4 {
+  font-size: var(--fs-body-sm);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: var(--space-sm);
+  color: var(--text-primary);
+}
+
+.footer-col ul { display: flex; flex-direction: column; gap: var(--space-xs); }
+.footer-col a {
+  font-size: var(--fs-body-sm);
+  color: var(--text-tertiary);
+  transition: color var(--dur-fast);
+}
+.footer-col a:hover { color: var(--color-primary); }
+
+.footer-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: var(--space-lg);
+  border-top: 1px solid var(--border-glass);
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.footer-bottom p { font-size: var(--fs-caption); color: var(--text-tertiary); }
+
+.footer-legal { display: flex; gap: var(--space-md); }
+.footer-legal a { font-size: var(--fs-caption); color: var(--text-tertiary); }
+.footer-legal a:hover { color: var(--color-primary); }
+
+.footer-badges { display: flex; gap: var(--space-2xs); align-items: center; }
