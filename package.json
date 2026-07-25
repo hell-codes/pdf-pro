@@ -1,0 +1,40 @@
+{
+  "name": "pdf-pro",
+  "version": "1.0.0",
+  "description": "PDF Pro — The fastest and most beautiful PDF toolkit.",
+  "main": "server/app.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server/app.js",
+    "dev": "nodemon server/app.js",
+    "clean:temp": "node server/utils/cleanupTemp.js"
+  },
+  "keywords": ["pdf", "converter", "merge", "split", "compress", "watermark"],
+  "author": "PDF Pro",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "compression": "^1.7.4",
+    "morgan": "^1.10.0",
+    "dotenv": "^16.4.5",
+    "multer": "^1.4.5-lts.1",
+    "pdf-lib": "^1.17.1",
+    "pdf-parse": "^1.1.1",
+    "sharp": "^0.33.4",
+    "mammoth": "^1.7.2",
+    "archiver": "^7.0.1",
+    "express-rate-limit": "^7.3.1",
+    "uuid": "^9.0.1",
+    "fs-extra": "^11.2.0",
+    "libreoffice-convert": "^1.6.0",
+    "pdf-poppler": "^0.2.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
+}
