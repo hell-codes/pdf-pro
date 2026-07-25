@@ -1,0 +1,9 @@
+server/
+uploads/
+converted/
+temp/
+Dockerfile
+render.yaml
+.dockerignore
+.env
+.env.example
