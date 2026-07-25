@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Word to PDF — PDF Pro</title>
+<meta name="description" content="Upload a .doc or .docx file and get a polished, universally-readable PDF in return.">
+<meta name="theme-color" content="#F8FAFC">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="../css/variables.css">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/navbar.css">
+<link rel="stylesheet" href="../css/hero.css">
+<link rel="stylesheet" href="../css/cards.css">
+<link rel="stylesheet" href="../css/upload.css">
+<link rel="stylesheet" href="../css/footer.css">
+<link rel="stylesheet" href="../css/animations.css">
+<link rel="stylesheet" href="../css/responsive.css">
+</head>
+<body data-tool="word-to-pdf">
+
+<div class="page-transition-overlay"><div class="page-loader-mark"></div></div>
+
+<header class="navbar" id="navbar">
+  <div class="navbar-inner">
+    <a href="../index.html" class="brand">
+      <span class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>
+      </span>
+      PDF Pro
+    </a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="../all-tools.html" class="nav-link">All Tools</a>
+      <a href="../index.html#how-it-works" class="nav-link">How it Works</a>
+      <a href="../index.html#faq" class="nav-link">FAQ</a>
+    </nav>
+    <div class="nav-actions">
+      <button class="theme-toggle" data-theme-toggle aria-label="Toggle dark mode">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+      </button>
+      <a href="../all-tools.html" class="btn btn-secondary btn-sm">All Tools</a>
+      <button class="nav-burger" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<div class="mobile-menu">
+  <a href="../all-tools.html">All Tools</a>
+  <a href="../index.html#how-it-works">How it Works</a>
+  <a href="../index.html#faq">FAQ</a>
+</div>
+
+<main class="workspace">
+  <div class="blob-field">
+    <div class="blob hero-blob-1" style="width:480px;height:480px;top:-160px;left:-140px;"></div>
+    <div class="blob hero-blob-2" style="width:420px;height:420px;top:60px;right:-160px;"></div>
+  </div>
+
+  <div class="container">
+    <div class="workspace-header" data-reveal="up">
+      <div class="workspace-tool-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg></div>
+      <span class="eyebrow">Convert</span>
+      <h1 class="section-title">Convert Word documents to PDF</h1>
+      <p class="section-sub">Upload a .doc or .docx file and get a polished, universally-readable PDF in return.</p>
+    </div>
+
+    <div class="dropzone glass" tabindex="0" role="button" aria-label="Upload files">
+      <input type="file" accept=".doc,.docx" >
+      <div class="dropzone-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg>
+      </div>
+      <h3>Drop your Word file here</h3>
+      <p>or click to browse from your device</p>
+      <div class="dropzone-formats">
+        <span class="chip"><span class="chip-dot"></span>.doc / .docx</span>
+        <span class="chip"><span class="chip-dot"></span>Up to 50MB</span>
+      </div>
+    </div>
+
+    <div class="file-list"></div>
+
+    
+
+    <div class="workspace-cta">
+      <button class="btn btn-primary btn-lg" data-action="convert" type="button">Convert to PDF</button>
+    </div>
+
+    <div class="result-panel glass-strong" hidden>
+      <div class="result-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6L9 17l-5-5"/></svg></div>
+      <h3>All done!</h3>
+      <p>Your PDF is ready to download.</p>
+      <div class="result-actions">
+        <button class="btn btn-primary" data-action="download" type="button">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+          Download Result
+        </button>
+        <a href="../all-tools.html" class="btn btn-secondary">Back to All Tools</a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-bottom" style="border-top:none; padding-top:0;">
+      <p>© 2026 PDF Pro. All rights reserved.</p>
+      <div class="footer-legal">
+        <a href="../index.html">Home</a>
+        <a href="../all-tools.html">All Tools</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../js/utils.js"></script>
+<script src="../js/theme.js"></script>
+<script src="../js/toast.js"></script>
+<script src="../js/validation.js"></script>
+<script src="../js/dragdrop.js"></script>
+<script src="../js/upload.js"></script>
+<script src="../js/config.js"></script>
+<script src="../js/converter.js"></script>
+<script src="../js/animations.js"></script>
+<script src="../js/app.js"></script>
+</body>
+</html>
