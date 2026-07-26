@@ -16,7 +16,7 @@ const app = express();
 
 app.use(
   helmet({
-    contentSecurityPolicy: false, // the demo frontend uses inline styles/scripts freely
+    contentSecurityPolicy: false, 
     crossOriginResourcePolicy: { policy: 'cross-origin' },
   })
 );
