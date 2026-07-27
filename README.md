@@ -1,4 +1,4 @@
-# PDF Pro
+# pdf-pro
 
 **The fastest & most beautiful PDF toolkit.**
 
