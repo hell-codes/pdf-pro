@@ -67,7 +67,14 @@
       </div>
       <div class="account-row">
         <span class="account-row-label">Email status</span>
-        <span class="account-row-value" data-account-verified>—</span>
+        <span class="account-row-value" data-account-verified></span>
+      </div>
+      <div class="account-row account-verification-actions" data-verification-row hidden>
+        <span class="account-row-label">Verify email</span>
+        <span class="account-row-value account-verification-buttons">
+          <button class="btn btn-secondary btn-sm" data-account-resend>Resend verification email</button>
+          <button class="btn btn-secondary btn-sm" data-account-refresh>I already verified</button>
+        </span>
       </div>
       <div class="account-row">
         <span class="account-row-label">Member since</span>
