@@ -1,8 +1,8 @@
 window.PDF_PRO_FIREBASE_CONFIG = {
-  apiKey: 'REPLACE_WITH_FIREBASE_API_KEY',
-  authDomain: 'REPLACE_WITH_PROJECT.firebaseapp.com',
-  projectId: 'REPLACE_WITH_PROJECT_ID',
-  storageBucket: 'REPLACE_WITH_PROJECT.appspot.com',
-  messagingSenderId: 'REPLACE_WITH_SENDER_ID',
-  appId: 'REPLACE_WITH_APP_ID',
+  apiKey: "AIzaSyBQzojq42brhGcn2GLOyU3Yt_yMZ_3iG9w",
+  authDomain: "pdf-pro-7d8c5.firebaseapp.com",
+  projectId: "pdf-pro-7d8c5",
+  storageBucket: "pdf-pro-7d8c5.firebasestorage.app",
+  messagingSenderId: "905307051212",
+  appId: "1:905307051212:web:2e6d7c744f810c51685e69"
 };
