@@ -43,6 +43,10 @@
 @media (max-width: 420px) {
   .tools-grid { grid-template-columns: 1fr; }
   .hero-orb-ring { width: 280px; height: 280px; }
+  .hero-card { max-width: 264px; }
+  .chip-word { left: -4px; top: -6px; }
+  .chip-jpg { right: -4px; bottom: 44px; }
+  .chip-lock { left: 16px; bottom: -12px; }
 }
 
 @media (max-height: 500px) and (orientation: landscape) {
