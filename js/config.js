@@ -1,5 +1,5 @@
 (function () {
-  const RENDER_BACKEND_URL = 'https://REPLACE-WITH-YOUR-RENDER-URL.onrender.com';
+  const RENDER_BACKEND_URL = 'https://pdf-pro-yrkn.onrender.com';
 
   const host = window.location.hostname;
   const isLocalhost = host === 'localhost' || host === '127.0.0.1' || host === '';
