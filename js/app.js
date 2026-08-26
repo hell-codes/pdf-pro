@@ -221,7 +221,11 @@
       }
 
       const ids = manager.getOrderedIds ? manager.getOrderedIds() : [];
-      if (tool === 'merge' || tool === 'rearrange') options.order = ids;
+      if (tool === 'merge') options.order = ids;
+      if (tool === 'rearrange') {
+        options.order = ids;
+        options.pageOrder = ids;
+      }
 
       setLoading(cta, true);
       if (resultPanel) resultPanel.hidden = true;

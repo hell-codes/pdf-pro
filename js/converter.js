@@ -1,6 +1,4 @@
 const PDFProConverter = (function () {
-  const API_BASE = (window.PDF_PRO_API_BASE || '') + '/api/pdf';
-
   const ENDPOINTS = {
     'pdf-to-word': '/pdf-to-word',
     'word-to-pdf': '/word-to-pdf',
@@ -27,6 +25,28 @@ const PDFProConverter = (function () {
     error.code = code || 'ERROR';
     if (status) error.status = status;
     return error;
+  }
+
+  function getApiBase() {
+    let base = (window.PDF_PRO_API_BASE || '').trim();
+    while (base.endsWith('/')) {
+      base = base.slice(0, -1);
+    }
+    if (base.endsWith('/api/pdf')) {
+      base = base.slice(0, -8);
+    } else if (base.endsWith('/api')) {
+      base = base.slice(0, -4);
+    }
+    if (base.startsWith('http://') && (base.includes('.onrender.com') || base.includes('.render.com'))) {
+      base = 'https://' + base.slice(7);
+    }
+    return (base || '') + '/api/pdf';
+  }
+
+  function resolveUrl(toolOrEndpoint) {
+    const endpoint = ENDPOINTS[toolOrEndpoint] || (toolOrEndpoint.startsWith('/') ? toolOrEndpoint : '/' + toolOrEndpoint);
+    const cleanEndpoint = endpoint.startsWith('/') ? endpoint : '/' + endpoint;
+    return getApiBase() + cleanEndpoint;
   }
 
   function parseFilename(xhr) {
@@ -87,8 +107,9 @@ const PDFProConverter = (function () {
         formData.append(key, typeof value === 'object' ? JSON.stringify(value) : value);
       });
 
+      const url = resolveUrl(endpoint);
       const xhr = new XMLHttpRequest();
-      xhr.open('POST', API_BASE + endpoint);
+      xhr.open('POST', url);
       xhr.responseType = 'blob';
       xhr.timeout = REQUEST_TIMEOUT_MS;
 
@@ -174,7 +195,7 @@ const PDFProConverter = (function () {
     if (convert.lastXhr) convert.lastXhr.abort();
   }
 
-  return { convert, cancel, ENDPOINTS };
+  return { convert, cancel, ENDPOINTS, getApiBase, resolveUrl };
 })();
 
 window.PDFProConverter = PDFProConverter;
