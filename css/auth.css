@@ -475,6 +475,44 @@
   padding: var(--space-xl) 0;
 }
 
+.verification-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.verification-badge.verified {
+  background: rgba(34, 197, 94, 0.12);
+  color: #16a34a;
+}
+
+.verification-badge.not-verified {
+  background: rgba(245, 158, 11, 0.12);
+  color: #d97706;
+}
+
+[data-theme='dark'] .verification-badge.verified {
+  background: rgba(34, 197, 94, 0.18);
+  color: #4ade80;
+}
+
+[data-theme='dark'] .verification-badge.not-verified {
+  background: rgba(245, 158, 11, 0.18);
+  color: #fbbf24;
+}
+
+.account-verification-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2xs);
+  justify-content: flex-end;
+}
+
 @media (max-width: 480px) {
   .auth-modal {
     padding: var(--space-lg) var(--space-md) var(--space-md);
