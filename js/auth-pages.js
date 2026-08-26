@@ -212,9 +212,25 @@
     }
   }
 
+  function initPasswordToggles() {
+    const toggles = document.querySelectorAll('[data-password-toggle]');
+    toggles.forEach((toggle) => {
+      toggle.addEventListener('click', () => {
+        const input = document.getElementById(toggle.dataset.passwordToggle);
+        if (!input) return;
+        const willShow = input.type === 'password';
+        input.type = willShow ? 'text' : 'password';
+        toggle.classList.toggle('is-visible', willShow);
+        toggle.setAttribute('aria-pressed', String(willShow));
+        toggle.setAttribute('aria-label', willShow ? 'Hide password' : 'Show password');
+      });
+    });
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     if (page === 'login') initLogin();
     else if (page === 'signup') initSignup();
     else if (page === 'account') initAccount();
+    initPasswordToggles();
   });
 })();

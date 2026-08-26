@@ -1,5 +1,7 @@
 (function () {
   const prefix = window.location.pathname.includes('/tools/') ? '../' : '';
+  const authPage = document.body.dataset.authPage;
+  const suppressAuthNav = authPage === 'login' || authPage === 'signup';
   let pendingResolve = null;
   let modalEl = null;
 
@@ -15,6 +17,7 @@
 
   function renderNav(user) {
     if (!window.PDFProAuth || !window.PDFProAuth.isConfigured()) return;
+    if (suppressAuthNav) return;
 
     document.querySelectorAll('.nav-actions').forEach((actions) => {
       const existing = actions.querySelector('.auth-slot');
@@ -40,7 +43,7 @@
           </div>
         `;
       } else {
-        slot.innerHTML = `<button class="btn btn-secondary btn-sm" data-auth-open="login">Log in</button>`;
+        slot.innerHTML = `<a class="btn btn-secondary btn-sm" href="${prefix}login.html">Log in</a>`;
       }
 
       const themeToggle = actions.querySelector('.theme-toggle');
@@ -74,22 +77,14 @@
         menu.appendChild(logout);
       } else {
         const login = document.createElement('a');
-        login.href = '#';
+        login.href = `${prefix}login.html`;
         login.textContent = 'Log in';
         login.setAttribute('data-auth-mobile', '');
-        login.addEventListener('click', (e) => {
-          e.preventDefault();
-          openAuthModal({ mode: 'login' });
-        });
 
         const signup = document.createElement('a');
-        signup.href = '#';
+        signup.href = `${prefix}signup.html`;
         signup.textContent = 'Create account';
         signup.setAttribute('data-auth-mobile', '');
-        signup.addEventListener('click', (e) => {
-          e.preventDefault();
-          openAuthModal({ mode: 'signup' });
-        });
 
         menu.appendChild(login);
         menu.appendChild(signup);
@@ -348,7 +343,29 @@
     }
   });
 
+  function ensureNavExtras() {
+    document.querySelectorAll('.nav-links').forEach((links) => {
+      if (links.querySelector('a[href$="pricing.html"]')) return;
+      const link = document.createElement('a');
+      link.href = `${prefix}pricing.html`;
+      link.className = 'nav-link';
+      link.textContent = 'Pricing';
+      links.appendChild(link);
+    });
+
+    document.querySelectorAll('.mobile-menu').forEach((menu) => {
+      if (menu.querySelector('a[href$="pricing.html"]')) return;
+      const link = document.createElement('a');
+      link.href = `${prefix}pricing.html`;
+      link.textContent = 'Pricing';
+      const firstAuthItem = menu.querySelector('[data-auth-mobile]');
+      if (firstAuthItem) menu.insertBefore(link, firstAuthItem);
+      else menu.appendChild(link);
+    });
+  }
+
   function boot() {
+    ensureNavExtras();
     if (window.PDFProAuth) {
       window.PDFProAuth.onChange(renderNav);
     }
