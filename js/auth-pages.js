@@ -103,7 +103,7 @@
     const submit = form.querySelector('button[type="submit"]');
 
     window.PDFProAuth.onChange((user) => {
-      if (user) window.location.href = getNextTarget();
+      if (user && user.emailVerified) window.location.href = getNextTarget();
     });
 
     form.addEventListener('submit', async (e) => {
@@ -122,6 +122,7 @@
       setSubmitting(submit, true, 'Creating account…');
       try {
         await window.PDFProAuth.signUp(email, name, password);
+        window.PDFProToast.success('Account created! A verification email has been sent — please check your inbox.');
         window.location.href = getNextTarget();
       } catch (error) {
         showError(errorBox, error.message);
@@ -139,14 +140,21 @@
     }
   }
 
-  async function loadCreatedAt(uid, target) {
-    if (typeof firebase === 'undefined' || !firebase.apps.length) return;
+  async function loadCreatedAt(uid, target, fallbackCreationTime) {
+    if (typeof firebase === 'undefined' || !firebase.apps.length) {
+      if (fallbackCreationTime) target.textContent = formatDate(fallbackCreationTime);
+      return;
+    }
     try {
       const doc = await firebase.firestore().collection('users').doc(uid).get();
       if (doc.exists && doc.data().createdAt) {
         target.textContent = formatDate(doc.data().createdAt);
+      } else if (fallbackCreationTime) {
+        target.textContent = formatDate(fallbackCreationTime);
       }
-    } catch (_) {}
+    } catch (_) {
+      if (fallbackCreationTime) target.textContent = formatDate(fallbackCreationTime);
+    }
   }
 
   function initAccount() {
@@ -191,16 +199,25 @@
       if (emailHeader) emailHeader.textContent = user.email || '';
 
       const emailValue = qs('[data-account-email]');
-      if (emailValue) emailValue.textContent = user.email || '—';
+      if (emailValue) emailValue.textContent = user.email || '';
 
       const verified = qs('[data-account-verified]');
-      if (verified) verified.textContent = user.emailVerified ? 'Verified' : 'Not verified';
+      if (verified) {
+        if (user.emailVerified) {
+          verified.innerHTML = '<span class="verification-badge verified">Verified</span>';
+        } else {
+          verified.innerHTML = '<span class="verification-badge not-verified">Not verified</span>';
+        }
+      }
+
+      const verifyRow = qs('[data-verification-row]');
+      if (verifyRow) verifyRow.hidden = user.emailVerified;
 
       const uidEl = qs('[data-account-uid]');
       if (uidEl) uidEl.textContent = user.uid;
 
       const created = qs('[data-account-created]');
-      if (created) loadCreatedAt(user.uid, created);
+      if (created) loadCreatedAt(user.uid, created, user.creationTime);
     });
 
     const logout = qs('[data-account-logout]');
@@ -208,6 +225,41 @@
       logout.addEventListener('click', async () => {
         await window.PDFProAuth.logOut();
         window.location.href = 'index.html';
+      });
+    }
+
+    const resendBtn = qs('[data-account-resend]');
+    if (resendBtn) {
+      resendBtn.addEventListener('click', async () => {
+        resendBtn.disabled = true;
+        try {
+          await window.PDFProAuth.sendVerificationEmail();
+          window.PDFProToast.success('Verification email sent. Check your inbox.');
+        } catch (error) {
+          window.PDFProToast.error(error.message);
+        } finally {
+          resendBtn.disabled = false;
+        }
+      });
+    }
+
+    const refreshBtn = qs('[data-account-refresh]');
+    if (refreshBtn) {
+      refreshBtn.addEventListener('click', async () => {
+        refreshBtn.disabled = true;
+        try {
+          await window.PDFProAuth.reloadUser();
+          const u = window.PDFProAuth.currentUser();
+          if (u && u.emailVerified) {
+            window.PDFProToast.success('Email verified!');
+          } else {
+            window.PDFProToast.info('Email not verified yet. Please check your inbox and click the verification link.');
+          }
+        } catch (_) {
+          window.PDFProToast.error('Could not refresh verification status. Please try again.');
+        } finally {
+          refreshBtn.disabled = false;
+        }
       });
     }
   }

@@ -254,7 +254,7 @@
       try {
         if (currentMode === 'signup') {
           await window.PDFProAuth.signUp(email, name, password);
-          window.PDFProToast.success('Account created. You are now signed in.');
+          window.PDFProToast.success('Account created! A verification email has been sent — please check your inbox.');
         } else {
           await window.PDFProAuth.logIn(email, password);
           window.PDFProToast.success('Signed in successfully.');

@@ -84,6 +84,7 @@ const PDFProAuth = (function () {
             email: firebaseUser.email,
             displayName: firebaseUser.displayName,
             emailVerified: firebaseUser.emailVerified,
+            creationTime: firebaseUser.metadata.creationTime,
           };
         } else {
           user = null;
@@ -105,6 +106,7 @@ const PDFProAuth = (function () {
         await credential.user.updateProfile({ displayName });
       }
       await writeProfile(credential.user, { displayName, isNew: true });
+      await credential.user.sendEmailVerification();
       return credential.user;
     } catch (error) {
       throw new Error(friendlyError(error));
@@ -145,6 +147,28 @@ const PDFProAuth = (function () {
     }
   }
 
+  async function sendVerificationEmail() {
+    if (!configured || !auth || !auth.currentUser) throw new Error('You must be signed in to verify your email.');
+    try {
+      await auth.currentUser.sendEmailVerification();
+    } catch (error) {
+      throw new Error(friendlyError(error));
+    }
+  }
+
+  async function reloadUser() {
+    if (!configured || !auth || !auth.currentUser) return;
+    await auth.currentUser.reload();
+    user = {
+      uid: auth.currentUser.uid,
+      email: auth.currentUser.email,
+      displayName: auth.currentUser.displayName,
+      emailVerified: auth.currentUser.emailVerified,
+      creationTime: auth.currentUser.metadata.creationTime,
+    };
+    notify();
+  }
+
   function onChange(listener) {
     listeners.add(listener);
     if (ready) {
@@ -179,6 +203,8 @@ const PDFProAuth = (function () {
     logOut,
     resetPassword,
     getIdToken,
+    sendVerificationEmail,
+    reloadUser,
     onChange,
     isLoggedIn,
     currentUser,
