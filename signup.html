@@ -62,7 +62,12 @@
       </span>
     </div>
     <h1 class="auth-modal-title">Create your account</h1>
-    <p class="auth-modal-subtitle">Free forever. Work with larger files and save your workspace.</p>
+    <p class="auth-modal-subtitle">Create your free account to unlock larger file processing.</p>
+
+    <nav class="auth-tabs" aria-label="Log in or sign up">
+      <a class="auth-tab" href="login.html">Log in</a>
+      <a class="auth-tab active" href="signup.html" aria-current="page">Sign up</a>
+    </nav>
 
     <div class="auth-error" data-auth-notice hidden></div>
 
@@ -77,17 +82,39 @@
       </div>
       <div class="auth-field">
         <label for="signupPassword">Password</label>
-        <input id="signupPassword" type="password" autocomplete="new-password" placeholder="At least 6 characters" required>
+        <div class="auth-input-wrap">
+          <input id="signupPassword" type="password" autocomplete="new-password" placeholder="At least 6 characters" required>
+          <button type="button" class="auth-toggle-visibility" data-password-toggle="signupPassword" aria-label="Show password" aria-pressed="false">
+            <svg class="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg class="icon-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><path d="M1 1l22 22"/></svg>
+          </button>
+        </div>
       </div>
       <div class="auth-field">
         <label for="signupConfirm">Confirm password</label>
-        <input id="signupConfirm" type="password" autocomplete="new-password" placeholder="••••••••" required>
+        <div class="auth-input-wrap">
+          <input id="signupConfirm" type="password" autocomplete="new-password" placeholder="Re-enter your password" required>
+          <button type="button" class="auth-toggle-visibility" data-password-toggle="signupConfirm" aria-label="Show password" aria-pressed="false">
+            <svg class="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg class="icon-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><path d="M1 1l22 22"/></svg>
+          </button>
+        </div>
       </div>
 
       <div class="auth-error" data-auth-error hidden></div>
 
       <button type="submit" class="btn btn-primary auth-submit">Create account</button>
     </form>
+
+    <div class="auth-benefits">
+      <p class="auth-benefits-title">Your free account</p>
+      <ul>
+        <li>Process files up to 100 MB (10 MB without an account)</li>
+        <li>Save your account and preferences</li>
+        <li>Higher processing limits</li>
+        <li>Password recovery</li>
+      </ul>
+    </div>
 
     <p class="auth-switch">Already have an account? <a href="login.html">Log in</a></p>
   </div>
