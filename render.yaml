@@ -4,11 +4,23 @@ services:
     env: docker
     plan: free
     dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
         value: 5000
       - key: CORS_ORIGINS
-        value: "*"
-    healthCheckPath: /api/health
+        sync: false
+      - key: GUEST_MAX_MB
+        value: "10"
+      - key: AUTH_MAX_MB
+        value: "100"
+      - key: MAX_FILES
+        value: "20"
+      - key: FIREBASE_PROJECT_ID
+        sync: false
+      - key: FIREBASE_CLIENT_EMAIL
+        sync: false
+      - key: FIREBASE_PRIVATE_KEY
+        sync: false

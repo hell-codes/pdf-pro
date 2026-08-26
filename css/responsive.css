@@ -13,6 +13,9 @@
 @media (max-width: 900px) {
   :root { --space-3xl: 4.5rem; --space-2xl: 3rem; }
 
+  .nav-actions .btn,
+  .nav-actions .auth-slot { display: none; }
+
   .stats-strip { grid-template-columns: repeat(2, 1fr); }
   .steps-row { grid-template-columns: 1fr; gap: var(--space-xl); }
   .testimonial-track { grid-template-columns: 1fr 1fr; }

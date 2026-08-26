@@ -2,6 +2,7 @@ const multer = require('multer');
 const path = require('path');
 const config = require('../config/config');
 const { sanitizeFilename } = require('../utils/fileUtils');
+const { AppError } = require('./errorHandler');
 
 const ALLOWED_MIME = new Set([
   'application/pdf',
@@ -29,7 +30,7 @@ function fileFilter(req, file, cb) {
   const extOk = ALLOWED_EXT.has(ext);
 
   if (!mimeOk && !extOk) {
-    return cb(new Error(`Unsupported file type: ${file.originalname}`));
+    return cb(new AppError('UNSUPPORTED_TYPE', `Unsupported file type: ${file.originalname}`, 415));
   }
   cb(null, true);
 }

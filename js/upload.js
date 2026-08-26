@@ -5,7 +5,7 @@ class UploadManager {
     this.listEl = opts.listEl;
     this.kind = opts.kind || 'pdf';
     this.multiple = opts.multiple !== false;
-    this.files = new Map(); // id -> { file, id, progress, status }
+    this.files = new Map();
 
     initDragDrop(this.dropzone);
     this.dropzone.addEventListener('files-selected', (e) => this.addFiles(e.detail.files));

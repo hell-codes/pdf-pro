@@ -1,6 +1,8 @@
-
 const PDFProValidation = (function () {
-  const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB per file
+  const GUEST_MAX_MB = window.PDF_PRO_GUEST_MAX_MB || 10;
+  const AUTH_MAX_MB = window.PDF_PRO_AUTH_MAX_MB || 100;
+  const GUEST_MAX_BYTES = GUEST_MAX_MB * 1024 * 1024;
+  const AUTH_MAX_BYTES = AUTH_MAX_MB * 1024 * 1024;
   const MAX_FILES = 20;
 
   const MIME_MAP = {
@@ -22,6 +24,10 @@ const PDFProValidation = (function () {
     image: ['jpg', 'jpeg', 'png', 'webp'],
   };
 
+  function isLoggedIn() {
+    return Boolean(window.PDFProAuth && window.PDFProAuth.isLoggedIn && window.PDFProAuth.isLoggedIn());
+  }
+
   function validateFile(file, kind = 'pdf') {
     if (!file) return { valid: false, error: 'No file provided.' };
 
@@ -29,10 +35,10 @@ const PDFProValidation = (function () {
       return { valid: false, error: `${file.name} is empty.` };
     }
 
-    if (file.size > MAX_FILE_SIZE) {
+    if (file.size > AUTH_MAX_BYTES) {
       return {
         valid: false,
-        error: `${file.name} exceeds the 50MB limit (${window.PDFProUtils.formatBytes(file.size)}).`,
+        error: `${file.name} exceeds the ${AUTH_MAX_MB}MB maximum (${window.PDFProUtils.formatBytes(file.size)}).`,
       };
     }
 
@@ -41,7 +47,7 @@ const PDFProValidation = (function () {
     const allowedMimes = MIME_MAP[kind] || MIME_MAP.pdf;
 
     const extOk = allowedExts.includes(ext);
-    const mimeOk = !file.type || allowedMimes.includes(file.type); // some OSes omit mime for certain types
+    const mimeOk = !file.type || allowedMimes.includes(file.type);
 
     if (!extOk && !mimeOk) {
       return {
@@ -71,7 +77,28 @@ const PDFProValidation = (function () {
     return { validFiles, errors };
   }
 
-  return { validateFile, validateFileList, MAX_FILE_SIZE, MAX_FILES };
+  function evaluateGate(files) {
+    const totalBytes = Array.from(files).reduce((sum, file) => sum + (file.size || 0), 0);
+    const loggedIn = isLoggedIn();
+
+    return {
+      totalBytes,
+      loggedIn,
+      exceedsAuthMax: totalBytes > AUTH_MAX_BYTES,
+      requiresLogin: !loggedIn && totalBytes > GUEST_MAX_BYTES,
+    };
+  }
+
+  return {
+    validateFile,
+    validateFileList,
+    evaluateGate,
+    GUEST_MAX_MB,
+    AUTH_MAX_MB,
+    GUEST_MAX_BYTES,
+    AUTH_MAX_BYTES,
+    MAX_FILES,
+  };
 })();
 
 window.PDFProValidation = PDFProValidation;

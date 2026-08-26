@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My account — PDF Pro</title>
+<meta name="description" content="Manage your PDF Pro account.">
+<meta name="theme-color" content="#F8FAFC">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/variables.css">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/navbar.css">
+<link rel="stylesheet" href="css/hero.css">
+<link rel="stylesheet" href="css/upload.css">
+<link rel="stylesheet" href="css/footer.css">
+<link rel="stylesheet" href="css/animations.css">
+<link rel="stylesheet" href="css/auth.css">
+<link rel="stylesheet" href="css/states.css">
+<link rel="stylesheet" href="css/responsive.css">
+</head>
+<body data-auth-page="account">
+
+<header class="navbar" id="navbar">
+  <div class="navbar-inner">
+    <a href="index.html" class="brand">
+      <span class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M9 15l2 2 4-4"/></svg>
+      </span>
+      PDF Pro
+    </a>
+    <div class="nav-actions">
+      <button class="theme-toggle" data-theme-toggle aria-label="Toggle dark mode">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+      </button>
+      <a href="all-tools.html" class="btn btn-secondary btn-sm">All Tools</a>
+      <button class="nav-burger" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<div class="mobile-menu">
+  <a href="index.html">Home</a>
+  <a href="all-tools.html">All Tools</a>
+</div>
+
+<main class="account-shell">
+  <div data-account-guard hidden></div>
+
+  <div data-account-content hidden>
+    <div class="account-header">
+      <span class="account-avatar" data-account-initial>?</span>
+      <div class="account-header-text">
+        <h1 data-account-displayname>Your account</h1>
+        <p data-account-email-header></p>
+      </div>
+    </div>
+
+    <div class="account-panel glass-strong">
+      <div class="account-row">
+        <span class="account-row-label">Email</span>
+        <span class="account-row-value" data-account-email>—</span>
+      </div>
+      <div class="account-row">
+        <span class="account-row-label">Email status</span>
+        <span class="account-row-value" data-account-verified>—</span>
+      </div>
+      <div class="account-row">
+        <span class="account-row-label">Member since</span>
+        <span class="account-row-value" data-account-created>—</span>
+      </div>
+      <div class="account-row">
+        <span class="account-row-label">Account ID</span>
+        <span class="account-row-value" data-account-uid>—</span>
+      </div>
+
+      <div class="account-actions">
+        <a class="btn btn-primary" href="all-tools.html">Go to tools</a>
+        <button class="btn btn-secondary" data-account-logout>Log out</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/toast.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/auth-ui.js"></script>
+<script src="js/animations.js"></script>
+<script src="js/auth-pages.js"></script>
+</body>
+</html>

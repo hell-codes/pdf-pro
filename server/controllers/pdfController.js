@@ -1,24 +1,18 @@
-const path = require('path');
-const fs = require('fs-extra');
+const config = require('../config/config');
 const { AppError } = require('../middleware/errorHandler');
-const { removeFiles } = require('../utils/fileUtils');
+const { removeFiles, deriveDownloadName, stripExtension } = require('../utils/fileUtils');
+const { withTimeout } = require('../utils/concurrency');
 
 const pdfService = require('../services/pdfService');
 const imageService = require('../services/imageService');
 const officeService = require('../services/officeService');
 const secureService = require('../services/secureService');
 
-async function sendResult(res, outPath, downloadName, cleanupPaths = []) {
-  res.download(outPath, downloadName, async (err) => {
-    if (err) console.error('[download] error streaming file:', err.message);
-    await removeFiles([outPath, ...cleanupPaths]);
-  });
-}
-
 function requireFiles(req, min = 1) {
   const files = req.files || [];
   if (files.length < min) {
     throw new AppError(
+      'NO_FILE',
       min === 1 ? 'Please upload a file to continue.' : `Please upload at least ${min} files.`,
       400
     );
@@ -26,218 +20,226 @@ function requireFiles(req, min = 1) {
   return files;
 }
 
+function inputPaths(files) {
+  return files.map((f) => f.path);
+}
+
+function originalNameOf(files) {
+  return files[0] && files[0].originalname ? files[0].originalname : 'document.pdf';
+}
+
+function sendResult(res, outPath, downloadName, cleanupPaths) {
+  res.setHeader('X-Result-Filename', encodeURIComponent(downloadName));
+  res.download(outPath, downloadName, async (err) => {
+    if (err && !res.headersSent) {
+      console.error('[download] failed to stream result:', err.message);
+    }
+    await removeFiles([outPath, ...cleanupPaths]);
+  });
+}
+
+async function execute(res, next, { files, downloadName, task, timeoutMs }) {
+  const cleanup = inputPaths(files);
+  try {
+    const outPath = await withTimeout(
+      Promise.resolve().then(task),
+      timeoutMs || config.processing.opTimeoutMs,
+      'This file took too long to process and was stopped. Try a smaller or simpler file.'
+    );
+    sendResult(res, outPath, downloadName, cleanup);
+  } catch (err) {
+    await removeFiles(cleanup);
+    next(err);
+  }
+}
 
 exports.mergePdfs = async (req, res, next) => {
   const files = requireFiles(req, 2);
-  try {
-    let paths = files.map((f) => f.path);
-    if (req.body.order) {
-      try {
-        const order = JSON.parse(req.body.order);
-        if (Array.isArray(order) && order.length === files.length) {
-        }
-      } catch (_) {  }
-    }
-    const outPath = await pdfService.mergePdfs(paths);
-    await sendResult(res, outPath, 'merged.pdf', paths);
-  } catch (err) {
-    await removeFiles(files.map((f) => f.path));
-    next(err);
-  }
+  const paths = inputPaths(files);
+  const downloadName = deriveDownloadName(originalNameOf(files), { suffix: '_merged', ext: 'pdf' });
+  await execute(res, next, {
+    files,
+    downloadName,
+    task: () => pdfService.mergePdfs(paths),
+  });
 };
 
 exports.splitPdf = async (req, res, next) => {
   const files = requireFiles(req, 1);
-  const filePath = files[0].path;
-  try {
-    const outPath = await pdfService.splitPdf(filePath, req.body.ranges);
-    await sendResult(res, outPath, 'split-pages.zip', [filePath]);
-  } catch (err) {
-    await removeFiles([filePath]);
-    next(err);
-  }
+  const original = originalNameOf(files);
+  await execute(res, next, {
+    files,
+    downloadName: deriveDownloadName(original, { suffix: '_split', ext: 'zip' }),
+    task: () => pdfService.splitPdf(files[0].path, req.body.ranges, { baseName: stripExtension(original) }),
+  });
 };
 
 exports.rotatePdf = async (req, res, next) => {
   const files = requireFiles(req, 1);
-  const filePath = files[0].path;
-  try {
-    const outPath = await pdfService.rotatePdf(filePath, req.body.rotation || 90, req.body.pages || 'all');
-    await sendResult(res, outPath, 'rotated.pdf', [filePath]);
-  } catch (err) {
-    await removeFiles([filePath]);
-    next(err);
-  }
+  await execute(res, next, {
+    files,
+    downloadName: deriveDownloadName(originalNameOf(files), { suffix: '_rotated', ext: 'pdf' }),
+    task: () => pdfService.rotatePdf(files[0].path, req.body.rotation || 90, req.body.pages || 'all'),
+  });
 };
 
 exports.deletePages = async (req, res, next) => {
   const files = requireFiles(req, 1);
-  const filePath = files[0].path;
-  try {
-    if (!req.body.pages) throw new AppError('Specify which pages to delete (e.g. "2,4-6").', 400);
-    const outPath = await pdfService.deletePages(filePath, req.body.pages);
-    await sendResult(res, outPath, 'pages-deleted.pdf', [filePath]);
-  } catch (err) {
-    await removeFiles([filePath]);
-    next(err);
+  if (!req.body.pages) {
+    await removeFiles(inputPaths(files));
+    return next(new AppError('INVALID_INPUT', 'Specify which pages to delete (e.g. "2,4-6").', 400));
   }
+  await execute(res, next, {
+    files,
+    downloadName: deriveDownloadName(originalNameOf(files), { suffix: '_pages-deleted', ext: 'pdf' }),
+    task: () => pdfService.deletePages(files[0].path, req.body.pages),
+  });
 };
 
 exports.rearrangePages = async (req, res, next) => {
   const files = requireFiles(req, 1);
-  const filePath = files[0].path;
-  try {
-    let order = [];
-    if (req.body.pageOrder) {
-      order = JSON.parse(req.body.pageOrder);
-    } else {
-      const totalPages = await pdfService.getPageCount(filePath);
-      order = Array.from({ length: totalPages }, (_, i) => i + 1);
-    }
-    const outPath = await pdfService.rearrangePages(filePath, order);
-    await sendResult(res, outPath, 'rearranged.pdf', [filePath]);
-  } catch (err) {
-    await removeFiles([filePath]);
-    next(err);
-  }
+  await execute(res, next, {
+    files,
+    downloadName: deriveDownloadName(originalNameOf(files), { suffix: '_rearranged', ext: 'pdf' }),
+    task: async () => {
+      let order = [];
+      if (req.body.pageOrder) {
+        try {
+          order = JSON.parse(req.body.pageOrder);
+        } catch (_) {
+          throw new AppError('INVALID_INPUT', 'The page order provided was not valid.', 400);
+        }
+      } else {
+        const totalPages = await pdfService.getPageCount(files[0].path);
+        order = Array.from({ length: totalPages }, (_, i) => i + 1);
+      }
+      return pdfService.rearrangePages(files[0].path, order);
+    },
+  });
 };
 
 exports.addWatermark = async (req, res, next) => {
   const files = requireFiles(req, 1);
-  const filePath = files[0].path;
-  try {
-    const outPath = await pdfService.addWatermark(filePath, {
-      text: req.body.text || 'CONFIDENTIAL',
-      opacity: parseFloat(req.body.opacity) || 0.3,
-      fontSize: parseInt(req.body.fontSize, 10) || 48,
-      color: req.body.color || '#4F46E5',
-      rotationDeg: parseInt(req.body.rotation, 10) || -45,
-      position: req.body.position || 'center',
-    });
-    await sendResult(res, outPath, 'watermarked.pdf', [filePath]);
-  } catch (err) {
-    await removeFiles([filePath]);
-    next(err);
-  }
+  await execute(res, next, {
+    files,
+    downloadName: deriveDownloadName(originalNameOf(files), { suffix: '_watermarked', ext: 'pdf' }),
+    task: () =>
+      pdfService.addWatermark(files[0].path, {
+        text: req.body.text || 'CONFIDENTIAL',
+        opacity: parseFloat(req.body.opacity) || 0.3,
+        fontSize: parseInt(req.body.fontSize, 10) || 48,
+        color: req.body.color || '#4F46E5',
+        rotationDeg: parseInt(req.body.rotation, 10) || -45,
+        position: req.body.position || 'center',
+      }),
+  });
 };
 
 exports.addPageNumbers = async (req, res, next) => {
   const files = requireFiles(req, 1);
-  const filePath = files[0].path;
-  try {
-    const outPath = await pdfService.addPageNumbers(filePath, {
-      position: req.body.position || 'bottom-center',
-      startAt: parseInt(req.body.startAt, 10) || 1,
-      fontSize: parseInt(req.body.fontSize, 10) || 11,
-      format: req.body.format || '{n}',
-    });
-    await sendResult(res, outPath, 'numbered.pdf', [filePath]);
-  } catch (err) {
-    await removeFiles([filePath]);
-    next(err);
-  }
+  await execute(res, next, {
+    files,
+    downloadName: deriveDownloadName(originalNameOf(files), { suffix: '_numbered', ext: 'pdf' }),
+    task: () =>
+      pdfService.addPageNumbers(files[0].path, {
+        position: req.body.position || 'bottom-center',
+        startAt: parseInt(req.body.startAt, 10) || 1,
+        fontSize: parseInt(req.body.fontSize, 10) || 11,
+        format: req.body.format || '{n}',
+      }),
+  });
 };
 
 exports.extractImages = async (req, res, next) => {
   const files = requireFiles(req, 1);
-  const filePath = files[0].path;
-  try {
-    const outPath = await pdfService.extractImages(filePath);
-    await sendResult(res, outPath, 'extracted-images.zip', [filePath]);
-  } catch (err) {
-    await removeFiles([filePath]);
-    next(err);
-  }
+  const original = originalNameOf(files);
+  await execute(res, next, {
+    files,
+    downloadName: deriveDownloadName(original, { suffix: '_images', ext: 'zip' }),
+    task: () => pdfService.extractImages(files[0].path, { baseName: stripExtension(original) }),
+  });
 };
 
 exports.imagesToPdf = async (req, res, next) => {
   const files = requireFiles(req, 1);
-  try {
-    const paths = files.map((f) => f.path);
-    const outPath = await imageService.imagesToPdf(paths, {
-      pageSize: req.body.pageSize || 'auto',
-      margin: parseInt(req.body.margin, 10) || 0,
-    });
-    await sendResult(res, outPath, 'images-to-pdf.pdf', paths);
-  } catch (err) {
-    await removeFiles(files.map((f) => f.path));
-    next(err);
-  }
+  const paths = inputPaths(files);
+  await execute(res, next, {
+    files,
+    downloadName: deriveDownloadName(originalNameOf(files), { suffix: '', ext: 'pdf' }),
+    task: () =>
+      imageService.imagesToPdf(paths, {
+        pageSize: req.body.pageSize || 'auto',
+        margin: parseInt(req.body.margin, 10) || 0,
+      }),
+  });
 };
 
 exports.pdfToJpg = async (req, res, next) => {
   const files = requireFiles(req, 1);
-  const filePath = files[0].path;
-  try {
-    const outPath = await imageService.pdfToJpg(filePath, {
-      quality: req.body.quality || 90,
-      dpi: req.body.dpi || 150,
-    });
-    await sendResult(res, outPath, 'pdf-pages.zip', [filePath]);
-  } catch (err) {
-    await removeFiles([filePath]);
-    next(err);
-  }
+  const original = originalNameOf(files);
+  await execute(res, next, {
+    files,
+    downloadName: deriveDownloadName(original, { suffix: '_jpg', ext: 'zip' }),
+    task: () =>
+      imageService.pdfToJpg(files[0].path, {
+        quality: parseInt(req.body.quality, 10) || 90,
+        dpi: parseInt(req.body.dpi, 10) || 150,
+        baseName: stripExtension(original),
+      }),
+  });
 };
 
 exports.compressPdf = async (req, res, next) => {
   const files = requireFiles(req, 1);
-  const filePath = files[0].path;
-  try {
-    const outPath = await imageService.compressPdf(filePath, { quality: req.body.quality || 'medium' });
-    await sendResult(res, outPath, 'compressed.pdf', [filePath]);
-  } catch (err) {
-    await removeFiles([filePath]);
-    next(err);
-  }
+  await execute(res, next, {
+    files,
+    downloadName: deriveDownloadName(originalNameOf(files), { suffix: '_compressed', ext: 'pdf' }),
+    task: () => imageService.compressPdf(files[0].path, { quality: req.body.quality || 'medium' }),
+  });
 };
 
 exports.wordToPdf = async (req, res, next) => {
   const files = requireFiles(req, 1);
-  const filePath = files[0].path;
-  try {
-    const outPath = await officeService.wordToPdf(filePath);
-    await sendResult(res, outPath, 'converted.pdf', [filePath]);
-  } catch (err) {
-    await removeFiles([filePath]);
-    next(err);
-  }
+  await execute(res, next, {
+    files,
+    downloadName: deriveDownloadName(originalNameOf(files), { suffix: '', ext: 'pdf' }),
+    task: () => officeService.wordToPdf(files[0].path),
+    timeoutMs: config.processing.officeTimeoutMs + 15000,
+  });
 };
 
 exports.pdfToWord = async (req, res, next) => {
   const files = requireFiles(req, 1);
-  const filePath = files[0].path;
-  try {
-    const outPath = await officeService.pdfToWord(filePath);
-    await sendResult(res, outPath, 'converted.docx', [filePath]);
-  } catch (err) {
-    await removeFiles([filePath]);
-    next(err);
-  }
+  await execute(res, next, {
+    files,
+    downloadName: deriveDownloadName(originalNameOf(files), { suffix: '', ext: 'docx' }),
+    task: () => officeService.pdfToWord(files[0].path),
+    timeoutMs: config.processing.officeTimeoutMs + 15000,
+  });
 };
 
 exports.protectPdf = async (req, res, next) => {
   const files = requireFiles(req, 1);
-  const filePath = files[0].path;
-  try {
-    if (!req.body.password) throw new AppError('A password is required to protect this PDF.', 400);
-    const outPath = await secureService.protectPdf(filePath, req.body.password);
-    await sendResult(res, outPath, 'protected.pdf', [filePath]);
-  } catch (err) {
-    await removeFiles([filePath]);
-    next(err);
+  if (!req.body.password) {
+    await removeFiles(inputPaths(files));
+    return next(new AppError('INVALID_INPUT', 'A password is required to protect this PDF.', 400));
   }
+  await execute(res, next, {
+    files,
+    downloadName: deriveDownloadName(originalNameOf(files), { suffix: '_protected', ext: 'pdf' }),
+    task: () => secureService.protectPdf(files[0].path, req.body.password),
+  });
 };
 
 exports.unlockPdf = async (req, res, next) => {
   const files = requireFiles(req, 1);
-  const filePath = files[0].path;
-  try {
-    if (!req.body.password) throw new AppError('Enter the PDF\'s current password to unlock it.', 400);
-    const outPath = await secureService.unlockPdf(filePath, req.body.password);
-    await sendResult(res, outPath, 'unlocked.pdf', [filePath]);
-  } catch (err) {
-    await removeFiles([filePath]);
-    next(err);
+  if (!req.body.password) {
+    await removeFiles(inputPaths(files));
+    return next(new AppError('INVALID_INPUT', "Enter the PDF's current password to unlock it.", 400));
   }
+  await execute(res, next, {
+    files,
+    downloadName: deriveDownloadName(originalNameOf(files), { suffix: '_unlocked', ext: 'pdf' }),
+    task: () => secureService.unlockPdf(files[0].path, req.body.password),
+  });
 };

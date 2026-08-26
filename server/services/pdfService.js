@@ -2,14 +2,19 @@ const fs = require('fs-extra');
 const path = require('path');
 const archiver = require('archiver');
 const { PDFDocument, rgb, degrees, StandardFonts } = require('pdf-lib');
-const { buildOutputPath } = require('../utils/fileUtils');
+const { buildOutputPath, sanitizeFilename } = require('../utils/fileUtils');
+const { AppError } = require('../middleware/errorHandler');
 
 async function loadPdf(filePath) {
   const bytes = await fs.readFile(filePath);
   try {
     return await PDFDocument.load(bytes, { ignoreEncryption: true });
   } catch (err) {
-    throw new Error(`Could not read "${path.basename(filePath)}" — it may be corrupted or not a valid PDF.`);
+    throw new AppError(
+      'FILE_CORRUPT',
+      `"${path.basename(filePath)}" appears to be corrupted or is not a valid PDF.`,
+      422
+    );
   }
 }
 
@@ -54,13 +59,15 @@ async function mergePdfs(filePaths) {
   return outPath;
 }
 
-async function splitPdf(filePath, rangeStr) {
+async function splitPdf(filePath, rangeStr, options = {}) {
+  const baseName = sanitizeFilename(options.baseName || 'part');
   const src = await loadPdf(filePath);
   const totalPages = src.getPageCount();
 
-  const groups = (rangeStr && rangeStr.trim() && rangeStr.trim().toLowerCase() !== 'all')
-    ? rangeStr.split(',').map((g) => g.trim()).filter(Boolean)
-    : Array.from({ length: totalPages }, (_, i) => String(i + 1)); // default: split every page
+  const groups =
+    rangeStr && rangeStr.trim() && rangeStr.trim().toLowerCase() !== 'all'
+      ? rangeStr.split(',').map((g) => g.trim()).filter(Boolean)
+      : Array.from({ length: totalPages }, (_, i) => String(i + 1));
 
   const outPath = buildOutputPath('split.zip');
   const output = fs.createWriteStream(outPath);
@@ -68,6 +75,7 @@ async function splitPdf(filePath, rangeStr) {
 
   await new Promise((resolve, reject) => {
     output.on('close', resolve);
+    output.on('error', reject);
     archive.on('error', reject);
     archive.pipe(output);
 
@@ -79,7 +87,7 @@ async function splitPdf(filePath, rangeStr) {
         const pages = await doc.copyPages(src, pageIndices);
         pages.forEach((p) => doc.addPage(p));
         const bytes = await doc.save();
-        archive.append(Buffer.from(bytes), { name: `part-${i + 1}.pdf` });
+        archive.append(Buffer.from(bytes), { name: `${baseName}_part_${i + 1}.pdf` });
       }
       archive.finalize();
     })().catch(reject);
@@ -92,7 +100,7 @@ async function rotatePdf(filePath, angle, pageRange) {
   const doc = await loadPdf(filePath);
   const totalPages = doc.getPageCount();
   const targetPages = new Set(parsePageRanges(pageRange, totalPages));
-  const normalizedAngle = ((parseInt(angle, 10) || 0) % 360 + 360) % 360;
+  const normalizedAngle = (((parseInt(angle, 10) || 0) % 360) + 360) % 360;
 
   doc.getPages().forEach((page, idx) => {
     if (targetPages.has(idx)) {
@@ -112,7 +120,11 @@ async function deletePages(filePath, pageRange) {
   const toDelete = new Set(parsePageRanges(pageRange, totalPages));
 
   if (toDelete.size >= totalPages) {
-    throw new Error('Cannot delete every page — the PDF must have at least one page remaining.');
+    throw new AppError(
+      'INVALID_INPUT',
+      'Cannot delete every page — the PDF must have at least one page remaining.',
+      400
+    );
   }
 
   const keepIndices = Array.from({ length: totalPages }, (_, i) => i).filter((i) => !toDelete.has(i));
@@ -132,7 +144,7 @@ async function rearrangePages(filePath, newOrder) {
 
   const validOrder = order.filter((i) => i >= 0 && i < totalPages);
   if (!validOrder.length) {
-    throw new Error('No valid page order was provided.');
+    throw new AppError('INVALID_INPUT', 'No valid page order was provided.', 400);
   }
 
   const doc = await PDFDocument.create();
@@ -151,7 +163,7 @@ async function addWatermark(filePath, options = {}) {
     fontSize = 48,
     color = '#4F46E5',
     rotationDeg = -45,
-    position = 'center', // center | tiled
+    position = 'center',
   } = options;
 
   const doc = await loadPdf(filePath);
@@ -168,8 +180,12 @@ async function addWatermark(filePath, options = {}) {
       for (let y = -height; y < height * 2; y += stepY) {
         for (let x = -width; x < width * 2; x += stepX) {
           page.drawText(text, {
-            x, y, size: fontSize, font,
-            color: rgb(r, g, b), opacity,
+            x,
+            y,
+            size: fontSize,
+            font,
+            color: rgb(r, g, b),
+            opacity,
             rotate: degrees(rotationDeg),
           });
         }
@@ -193,12 +209,7 @@ async function addWatermark(filePath, options = {}) {
 }
 
 async function addPageNumbers(filePath, options = {}) {
-  const {
-    position = 'bottom-center', 
-    startAt = 1,
-    fontSize = 11,
-    format = '{n}', 
-  } = options;
+  const { position = 'bottom-center', startAt = 1, fontSize = 11, format = '{n}' } = options;
 
   const doc = await loadPdf(filePath);
   const font = await doc.embedFont(StandardFonts.Helvetica);
@@ -225,9 +236,15 @@ async function addPageNumbers(filePath, options = {}) {
   return outPath;
 }
 
-async function extractImages(filePath) {
+async function extractImages(filePath, options = {}) {
+  const baseName = sanitizeFilename(options.baseName || 'image');
   const bytes = await fs.readFile(filePath);
-  const doc = await PDFDocument.load(bytes, { ignoreEncryption: true });
+  let doc;
+  try {
+    doc = await PDFDocument.load(bytes, { ignoreEncryption: true });
+  } catch (err) {
+    throw new AppError('FILE_CORRUPT', 'This PDF appears to be corrupted or unsupported.', 422);
+  }
 
   const outPath = buildOutputPath('extracted-images.zip');
   const output = fs.createWriteStream(outPath);
@@ -237,6 +254,7 @@ async function extractImages(filePath) {
 
   await new Promise((resolve, reject) => {
     output.on('close', resolve);
+    output.on('error', reject);
     archive.on('error', reject);
     archive.pipe(output);
 
@@ -245,23 +263,28 @@ async function extractImages(filePath) {
 
     for (const [ref, obj] of context.enumerateIndirectObjects()) {
       if (!obj || !obj.dict) continue;
-      const subtype = obj.dict?.get?.(context.obj('Subtype'));
       const key = ref.toString();
       if (seen.has(key)) continue;
 
-      const isImage = obj.constructor?.name === 'PDFRawStream' &&
-        obj.dict?.get && obj.dict.lookup && obj.dict.lookup(context.obj('Subtype'))?.toString() === '/Image';
+      const isImage =
+        obj.constructor?.name === 'PDFRawStream' &&
+        obj.dict?.get &&
+        obj.dict.lookup &&
+        obj.dict.lookup(context.obj('Subtype'))?.toString() === '/Image';
 
       if (isImage) {
         seen.add(key);
         try {
           const filterObj = obj.dict.lookup(context.obj('Filter'));
           const filterName = filterObj ? filterObj.toString() : '';
-          const ext = filterName.includes('DCTDecode') ? 'jpg' : filterName.includes('JPXDecode') ? 'jp2' : 'png';
+          const ext = filterName.includes('DCTDecode')
+            ? 'jpg'
+            : filterName.includes('JPXDecode')
+            ? 'jp2'
+            : 'png';
           imageCount += 1;
-          archive.append(Buffer.from(obj.contents), { name: `image-${imageCount}.${ext}` });
-        } catch (_) {
-        }
+          archive.append(Buffer.from(obj.contents), { name: `${baseName}_image_${imageCount}.${ext}` });
+        } catch (_) {}
       }
     }
 
@@ -270,14 +293,14 @@ async function extractImages(filePath) {
 
   if (imageCount === 0) {
     await fs.remove(outPath);
-    throw new Error('No embedded images were found in this PDF.');
+    throw new AppError('NO_IMAGES', 'No embedded images were found in this PDF.', 422);
   }
 
   return outPath;
 }
 
 function hexToRgb(hex) {
-  const clean = hex.replace('#', '');
+  const clean = String(hex).replace('#', '');
   const bigint = parseInt(clean, 16);
   return {
     r: ((bigint >> 16) & 255) / 255,
