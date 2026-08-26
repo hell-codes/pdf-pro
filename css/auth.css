@@ -447,6 +447,10 @@
   border-bottom: none;
 }
 
+.account-row[hidden] {
+  display: none;
+}
+
 .account-row-label {
   font-size: var(--fs-caption);
   text-transform: uppercase;
