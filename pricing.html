@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pricing — PDF Pro</title>
+<meta name="description" content="Simple PDF Pro pricing. Start free with files up to 10 MB, create a free account for up to 100 MB, and upgrade when you need more.">
+<meta name="theme-color" content="#F8FAFC">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/variables.css">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/navbar.css">
+<link rel="stylesheet" href="css/hero.css">
+<link rel="stylesheet" href="css/footer.css">
+<link rel="stylesheet" href="css/animations.css">
+<link rel="stylesheet" href="css/auth.css">
+<link rel="stylesheet" href="css/pricing.css">
+<link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+<div class="page-transition-overlay"><div class="page-loader-mark"></div></div>
+
+<header class="navbar" id="navbar">
+  <div class="navbar-inner">
+    <a href="index.html" class="brand">
+      <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg></span>
+      PDF Pro
+    </a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="index.html#how-it-works" class="nav-link">How it Works</a>
+      <a href="pricing.html" class="nav-link" aria-current="page">Pricing</a>
+      <a href="index.html#faq" class="nav-link">FAQ</a>
+    </nav>
+    <div class="nav-actions">
+      <button class="theme-toggle" data-theme-toggle aria-label="Toggle dark mode">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+      </button>
+      <a href="all-tools.html" class="btn btn-secondary btn-sm">All Tools</a>
+      <a href="tools/merge.html" class="btn btn-primary btn-sm">Get Started</a>
+      <button class="nav-burger" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<div class="mobile-menu">
+  <a href="all-tools.html">All Tools</a>
+  <a href="index.html#how-it-works">How it Works</a>
+  <a href="pricing.html">Pricing</a>
+  <a href="index.html#faq">FAQ</a>
+</div>
+
+<main>
+<section class="hero" style="padding-bottom: var(--space-lg);">
+  <div class="blob-field"><div class="blob hero-blob-1"></div><div class="blob hero-blob-2"></div></div>
+  <div class="container">
+    <div class="section-head center" data-reveal="up" style="max-width:660px;margin-inline:auto;">
+      <span class="eyebrow">Pricing</span>
+      <h1 class="section-title" style="font-size:var(--fs-display-lg)">Simple pricing. Powerful PDF tools.</h1>
+      <p class="section-sub">Start free and upgrade when you need more.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:0;">
+  <div class="container">
+    <div class="pricing-grid" data-reveal-group="pricing">
+
+      <article class="pricing-card glass" data-plan="free" data-reveal="up">
+        <div class="pricing-card-head">
+          <h2 class="pricing-name">Free</h2>
+          <p class="pricing-tagline">Perfect for everyday PDF tasks.</p>
+        </div>
+        <div class="pricing-price">
+          <span class="pricing-amount">$0</span>
+          <span class="pricing-period">forever</span>
+        </div>
+        <a class="btn btn-secondary btn-block pricing-cta" href="all-tools.html" data-plan-cta="free">Start for free</a>
+        <p class="pricing-current" data-plan-current="free" hidden>Your current plan</p>
+        <ul class="pricing-features">
+          <li>All PDF tools included</li>
+          <li>Files up to 10 MB without login</li>
+          <li>Basic processing</li>
+          <li>No installation — runs in your browser</li>
+          <li>Secure browser-based processing</li>
+        </ul>
+      </article>
+
+      <article class="pricing-card pricing-card-featured glass-strong" data-plan="pro" data-reveal="up">
+        <span class="pricing-badge">Most Popular</span>
+        <div class="pricing-card-head">
+          <h2 class="pricing-name">Pro</h2>
+          <p class="pricing-tagline">For users who work with PDFs regularly.</p>
+        </div>
+        <div class="pricing-price">
+          <span class="pricing-amount">$9.99</span>
+          <span class="pricing-period">/ month</span>
+        </div>
+        <button type="button" class="btn btn-primary btn-block pricing-cta" data-plan-cta="pro">Get Pro</button>
+        <p class="pricing-note" data-plan-note="pro">Coming soon — no payment taken yet</p>
+        <ul class="pricing-features">
+          <li>Files up to 100 MB</li>
+          <li>Higher processing limits</li>
+          <li>Faster, priority processing</li>
+          <li>All tools included</li>
+          <li>Account-based usage</li>
+          <li>Priority access to new features</li>
+        </ul>
+      </article>
+
+      <article class="pricing-card glass" data-plan="business" data-reveal="up">
+        <div class="pricing-card-head">
+          <h2 class="pricing-name">Business</h2>
+          <p class="pricing-tagline">For teams and organizations.</p>
+        </div>
+        <div class="pricing-price">
+          <span class="pricing-amount pricing-amount-text">Let's talk</span>
+        </div>
+        <a class="btn btn-secondary btn-block pricing-cta" href="mailto:hello@pdfpro.me?subject=PDF%20Pro%20for%20Business" data-plan-cta="business">Contact us</a>
+        <ul class="pricing-features">
+          <li>Higher limits for your team</li>
+          <li>Shared team usage</li>
+          <li>Priority processing</li>
+          <li>Advanced account management</li>
+          <li>Future team collaboration features</li>
+        </ul>
+      </article>
+
+    </div>
+
+    <p class="pricing-fineprint" data-reveal="up">
+      Guests can process files up to 10&nbsp;MB. A free account raises your limit to 100&nbsp;MB. Pro and Business are not yet available to purchase — no payment is taken today.
+    </p>
+  </div>
+</section>
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-bottom" style="border-top:none; padding-top:0;">
+      <p>© 2026 PDF Pro. All rights reserved.</p>
+      <div class="footer-legal"><a href="index.html">Home</a></div>
+    </div>
+  </div>
+</footer>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/toast.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/auth-ui.js"></script>
+<script src="js/animations.js"></script>
+<script src="js/pricing.js"></script>
+</body>
+</html>
